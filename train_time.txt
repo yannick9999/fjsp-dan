@@ -1,0 +1,1 @@
+model path: ./DANIEL_FJSP/trained_network/SD1/20x10+seed0_smoketest		training time: 274.05		 local time: 20260727_140825

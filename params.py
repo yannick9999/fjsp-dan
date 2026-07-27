@@ -112,4 +112,8 @@ parser.add_argument('--sample_times', type=int, default=100, help='Sampling time
 parser.add_argument('--test_model', nargs='+', default=['10x5+mix'], help='List of model for testing')
 parser.add_argument('--test_method', nargs='+', default=[], help='List of heuristic methods for testing')
 
+# args for run_test_suite.py (model_comparison_experiment)
+parser.add_argument('--seeds', nargs='+', type=int, default=[0, 1, 2],
+                    help='List of training seeds to evaluate in run_test_suite.py')
+
 configs = parser.parse_args()

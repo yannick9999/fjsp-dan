@@ -10,6 +10,7 @@ import os
 import random
 import time
 import sys
+import pandas as pd
 from model.PPO import PPO_initialize
 from model.PPO import Memory
 
@@ -75,6 +76,8 @@ class Trainer:
         self.ppo = PPO_initialize()
         self.memory = Memory(gamma=config.gamma, gae_lambda=config.gae_lambda)
 
+        self.total_env_steps = 0
+
     def train(self):
         """
             train the model following the config
@@ -82,6 +85,7 @@ class Trainer:
         setup_seed(self.seed_train)
         self.log = []
         self.validation_log = []
+        self.validation_curve = []
         self.record = float('inf')
 
         # print the setting
@@ -125,6 +129,7 @@ class Trainer:
 
                 # state transition
                 state, reward, done = self.env.step(actions=action_envs.cpu().numpy())
+                self.total_env_steps += self.num_envs
                 ep_rewards += reward
                 reward = torch.from_numpy(reward).to(device)
 
@@ -160,6 +165,10 @@ class Trainer:
 
                 self.validation_log.append(vali_result)
                 self.save_validation_log()
+
+                self.validation_curve.append((i_update + 1, self.total_env_steps, vali_result))
+                self.save_validation_curve()
+
                 tqdm.write(f'The validation quality is: {vali_result} (best : {self.record})')
 
             ep_et = time.time()
@@ -195,6 +204,13 @@ class Trainer:
         """
         file_writing_obj1 = open(f'./train_log/{self.data_source}/' + 'valiquality_' + self.model_name + '.txt', 'w')
         file_writing_obj1.write(str(self.validation_log))
+
+    def save_validation_curve(self):
+        """
+            save the validation curve (iteration, env_steps, makespan_avg) as an excel file
+        """
+        df = pd.DataFrame(self.validation_curve, columns=['iteration', 'env_steps', 'makespan_avg'])
+        df.to_excel(f'./train_log/{self.data_source}/valicurve_{self.model_name}.xlsx', index=False)
 
     def sample_training_instances(self):
         """

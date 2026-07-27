@@ -29,7 +29,7 @@ def test_greedy_strategy(data_set, model_path, seed):
     test_result_list = []
 
     setup_seed(seed)
-    ppo.policy.load_state_dict(torch.load(model_path, map_location='cuda'))
+    ppo.policy.load_state_dict(torch.load(model_path, map_location=device))
     ppo.policy.eval()
 
     n_j = data_set[0][0].shape[0]
@@ -73,7 +73,7 @@ def test_sampling_strategy(data_set, model_path, sample_times, seed):
     """
     setup_seed(seed)
     test_result_list = []
-    ppo.policy.load_state_dict(torch.load(model_path, map_location='cuda'))
+    ppo.policy.load_state_dict(torch.load(model_path, map_location=device))
     ppo.policy.eval()
 
     n_j = data_set[0][0].shape[0]
