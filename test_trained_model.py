@@ -174,5 +174,4 @@ def main(config, flag_sample):
 
 
 if __name__ == '__main__':
-    main(configs, False)
-    # main(configs, True)
+    main(configs, configs.test_mode)

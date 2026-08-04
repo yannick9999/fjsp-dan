@@ -1,1 +1,4 @@
 model path: ./DANIEL_FJSP/trained_network/SD1/20x10+seed0_smoketest		training time: 274.05		 local time: 20260727_140825
+model path: ./DANIEL_FJSP/trained_network/SD1/20x10+seed0		training time: 2185.16		 local time: 20260730_195405
+model path: ./DANIEL_FJSP/trained_network/SD1/20x10+seed1		training time: 2202.18		 local time: 20260730_195404
+model path: ./DANIEL_FJSP/trained_network/SD1/20x10+seed2		training time: 2163.92		 local time: 20260730_195631
