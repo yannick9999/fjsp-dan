@@ -1,0 +1,11 @@
+instance_name,makespan,runtime_seconds
+Mk01.fjs,50,0.0
+Mk02.fjs,35,0.0
+Mk03.fjs,240,0.0
+Mk04.fjs,92,0.0
+Mk05.fjs,209,0.0
+Mk06.fjs,93,0.0
+Mk07.fjs,199,0.0
+Mk08.fjs,634,0.3
+Mk09.fjs,381,0.1
+Mk10.fjs,293,0.2
