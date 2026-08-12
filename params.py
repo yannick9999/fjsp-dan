@@ -77,6 +77,13 @@ parser.add_argument('--num_heads_OAB', nargs='+', type=int, default=[4, 4],
                     help='Number of attention head of operation message attention block')
 parser.add_argument('--num_heads_MAB', nargs='+', type=int, default=[4, 4],
                     help='Number of attention head of machine message attention block')
+parser.add_argument('--pooling_type', type=str, default='nopooling',
+                    choices=['nopooling', 'sagc'],
+                    help='nopooling = original DAN, sagc = scheduling-aware graph coarsening')
+parser.add_argument('--pooling_ratio', type=float, default=0.6,
+                    help='pooling ratio, interpretation depends on k_mode')
+parser.add_argument('--k_mode', type=str, default='ops', choices=['ops', 'jobs'],
+                    help="'ops': k = ratio * N, 'jobs': k = ratio * num_jobs")
 parser.add_argument('--layer_fea_output_dim', nargs='+', type=int, default=[32, 8],
                     help='Output dimension of the DAN layers')
 

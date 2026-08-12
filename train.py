@@ -122,7 +122,9 @@ class Trainer:
                                                              mch_mask=state.mch_mask_tensor,  # [sz_b, M, M]
                                                              comp_idx=state.comp_idx_tensor,  # [sz_b, M, M, J]
                                                              dynamic_pair_mask=state.dynamic_pair_mask_tensor,  # [sz_b, J, M]
-                                                             fea_pairs=state.fea_pairs_tensor)  # [sz_b, J, M]
+                                                             fea_pairs=state.fea_pairs_tensor,  # [sz_b, J, M]
+                                                             opes_appertain=state.opes_appertain_tensor,
+                                                             deleted_op_nodes=state.deleted_op_nodes_tensor)
 
                 # sample the action
                 action_envs, action_logprob_envs = sample_action(pi_envs)
@@ -253,7 +255,9 @@ class Trainer:
                                         mch_mask=state.mch_mask_tensor,  # [sz_b, M, M]
                                         comp_idx=state.comp_idx_tensor,  # [sz_b, M, M, J]
                                         dynamic_pair_mask=state.dynamic_pair_mask_tensor,  # [sz_b, J, M]
-                                        fea_pairs=state.fea_pairs_tensor)  # [sz_b, J, M]
+                                        fea_pairs=state.fea_pairs_tensor,  # [sz_b, J, M]
+                                        opes_appertain=state.opes_appertain_tensor,
+                                        deleted_op_nodes=state.deleted_op_nodes_tensor)
 
             action = greedy_select_action(pi)
             state, _, done = self.vali_env.step(action.cpu().numpy())
@@ -284,7 +288,9 @@ class Trainer:
                                         mch_mask=state.mch_mask_tensor[batch_idx],  # [sz_b, M, M]
                                         comp_idx=state.comp_idx_tensor[batch_idx],  # [sz_b, M, M, J]
                                         dynamic_pair_mask=state.dynamic_pair_mask_tensor[batch_idx],  # [sz_b, J, M]
-                                        fea_pairs=state.fea_pairs_tensor[batch_idx])  # [sz_b, J, M]
+                                        fea_pairs=state.fea_pairs_tensor[batch_idx],  # [sz_b, J, M]
+                                        opes_appertain=state.opes_appertain_tensor[batch_idx],
+                                        deleted_op_nodes=state.deleted_op_nodes_tensor[batch_idx])
 
             action = greedy_select_action(pi)
             state, _, done = self.vali_env.step(action.cpu().numpy())

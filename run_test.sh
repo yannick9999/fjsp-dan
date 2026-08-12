@@ -33,7 +33,14 @@ SEED=${SLURM_ARRAY_TASK_ID}
 N_J=20
 N_M=10
 DATA_SOURCE=SD1
-MODEL_PATH="./trained_network/${DATA_SOURCE}/${N_J}x${N_M}+seed${SEED}.pth"
+
+# scheduling-aware graph coarsening (SAGC) -- must match run_train.sh
+POOLING_TYPE=sagc
+POOLING_RATIO=2.0
+K_MODE=jobs
+export RUN_TAG=sagc
+
+MODEL_PATH="./trained_network/${DATA_SOURCE}/${N_J}x${N_M}+${RUN_TAG}_seed${SEED}.pth"
 
 # Verify the model exists before launching
 if [[ ! -f "${MODEL_PATH}" ]]; then
@@ -41,7 +48,12 @@ if [[ ! -f "${MODEL_PATH}" ]]; then
     exit 1
 fi
 
-echo "=== Testing seed=${SEED} model=${MODEL_PATH} ==="
+echo "=== Testing seed=${SEED} model=${MODEL_PATH} pooling=${POOLING_TYPE} ratio=${POOLING_RATIO} k_mode=${K_MODE} ==="
 srun nvidia-smi || true
 
-exec srun "${PYTHON}" run_test_suite.py --seeds "${SEED}" --device cuda
+exec srun "${PYTHON}" run_test_suite.py \
+    --seeds "${SEED}" \
+    --pooling_type "${POOLING_TYPE}" \
+    --pooling_ratio "${POOLING_RATIO}" \
+    --k_mode "${K_MODE}" \
+    --device cuda

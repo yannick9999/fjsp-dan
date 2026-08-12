@@ -16,7 +16,16 @@ from test_trained_model import test_greedy_strategy, test_sampling_strategy
 DATA_SOURCE = 'SD1'
 N_J, N_M = 20, 10
 TEST_ROOT = './data/data_test'
-OUTPUT_ROOT = './model_comparison_experiment'
+
+# optional tag to keep a run's models/results separate from the baseline
+# (e.g. RUN_TAG=sagc -> trained_network/SD1/20x10+sagc_seed0.pth,
+# ./sagc_experiment/seed0/...), matching train.py's
+# --model_suffix "${RUN_TAG}_seed${SEED}" convention and the {method}_experiment
+# layout expected by model_comparison_experiment/common.py
+RUN_TAG = os.environ.get('RUN_TAG', '')
+MODEL_SUFFIX = f'{RUN_TAG}_seed' if RUN_TAG else 'seed'
+OUTPUT_ROOT = f'./{RUN_TAG}_experiment' if RUN_TAG else './model_comparison_experiment'
+RESULT_PREFIX = 'seed'
 
 
 def load_instances_with_names(directory):
@@ -63,7 +72,7 @@ def main():
         subfolders = [s.strip() for s in override.split(',') if s.strip()]
 
     for seed in configs.seeds:
-        model_path = f'./trained_network/{DATA_SOURCE}/{N_J}x{N_M}+seed{seed}.pth'
+        model_path = f'./trained_network/{DATA_SOURCE}/{N_J}x{N_M}+{MODEL_SUFFIX}{seed}.pth'
         if not os.path.exists(model_path):
             print(f'Skipping seed {seed}: model not found at {model_path}')
             continue
@@ -77,12 +86,12 @@ def main():
 
             t0 = time.time()
             greedy_result = test_greedy_strategy(data_set, model_path, configs.seed_test)
-            save_results(os.path.join(OUTPUT_ROOT, f'seed{seed}', f'{subfolder}_greedy'), names, greedy_result)
+            save_results(os.path.join(OUTPUT_ROOT, f'{RESULT_PREFIX}{seed}', f'{subfolder}_greedy'), names, greedy_result)
             print(f'greedy done in {time.time() - t0:.1f}s, mean makespan {greedy_result[:, 0].mean():.2f}')
 
             t0 = time.time()
             sample_result = test_sampling_strategy(data_set, model_path, configs.sample_times, configs.seed_test)
-            save_results(os.path.join(OUTPUT_ROOT, f'seed{seed}', f'{subfolder}_sample'), names, sample_result)
+            save_results(os.path.join(OUTPUT_ROOT, f'{RESULT_PREFIX}{seed}', f'{subfolder}_sample'), names, sample_result)
             print(f'sample done in {time.time() - t0:.1f}s, mean makespan {sample_result[:, 0].mean():.2f}')
 
 

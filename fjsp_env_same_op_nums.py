@@ -20,11 +20,14 @@ class EnvState:
     comp_idx_tensor: torch.Tensor = None
     candidate_tensor: torch.Tensor = None
     fea_pairs_tensor: torch.Tensor = None
+    opes_appertain_tensor: torch.Tensor = None
+    deleted_op_nodes_tensor: torch.Tensor = None
 
     device = torch.device(configs.device)
 
     def update(self, fea_j, op_mask, fea_m, mch_mask, dynamic_pair_mask,
-               comp_idx, candidate, fea_pairs):
+               comp_idx, candidate, fea_pairs,
+               opes_appertain=None, deleted_op_nodes=None):
         """
             update the state information
         :param fea_j: input operation feature vectors with shape [sz_b, N, 10]
@@ -51,6 +54,13 @@ class EnvState:
         self.mch_mask_tensor = torch.from_numpy(np.copy(mch_mask)).float().to(device)
         self.comp_idx_tensor = torch.from_numpy(np.copy(comp_idx)).to(device)
         self.dynamic_pair_mask_tensor = torch.from_numpy(np.copy(dynamic_pair_mask)).to(device)
+
+        if opes_appertain is not None:
+            self.opes_appertain_tensor = torch.from_numpy(
+                np.copy(opes_appertain)).long().to(device)
+        if deleted_op_nodes is not None:
+            self.deleted_op_nodes_tensor = torch.from_numpy(
+                np.copy(deleted_op_nodes)).bool().to(device)
 
     def print_shape(self):
         print(self.fea_j_tensor.shape)
@@ -160,6 +170,11 @@ class FJSPEnvForSameOpNums:
         # the index of last operation of each job ([E,J])
         self.job_last_op_id = self.job_first_op_id + self.job_length - 1
 
+        # job index per operation ([E, N]), static, needed for SAGC pooling
+        self.opes_appertain = np.stack(
+            [np.repeat(np.arange(self.number_of_jobs), self.job_length[k])
+             for k in range(self.number_of_envs)])
+
         self.initial_vars()
 
         self.init_op_mask()
@@ -230,7 +245,9 @@ class FJSPEnvForSameOpNums:
         self.old_state.update(self.fea_j, self.op_mask,
                               self.fea_m, self.mch_mask,
                               self.dynamic_pair_mask, self.comp_idx, self.candidate,
-                              self.fea_pairs)
+                              self.fea_pairs,
+                              opes_appertain=self.opes_appertain,
+                              deleted_op_nodes=self.deleted_op_nodes)
 
         # old record
         self.old_op_mask = np.copy(self.op_mask)
@@ -453,7 +470,9 @@ class FJSPEnvForSameOpNums:
         # update the state
         self.state.update(self.fea_j, self.op_mask, self.fea_m, self.mch_mask,
                           self.dynamic_pair_mask, self.comp_idx, self.candidate,
-                          self.fea_pairs)
+                          self.fea_pairs,
+                          opes_appertain=self.opes_appertain,
+                          deleted_op_nodes=self.deleted_op_nodes)
 
         return self.state, np.array(reward), self.done()
 

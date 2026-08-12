@@ -34,7 +34,13 @@ N_M=10
 DATA_SOURCE=SD1
 MAX_UPDATES=1000
 
-echo "=== Training seed=${SEED} data_source=${DATA_SOURCE} size=${N_J}x${N_M} ==="
+# scheduling-aware graph coarsening (SAGC)
+POOLING_TYPE=sagc
+POOLING_RATIO=2.0
+K_MODE=jobs
+RUN_TAG=sagc
+
+echo "=== Training seed=${SEED} data_source=${DATA_SOURCE} size=${N_J}x${N_M} pooling=${POOLING_TYPE} ratio=${POOLING_RATIO} k_mode=${K_MODE} ==="
 srun nvidia-smi || true
 
 exec srun "${PYTHON}" train.py \
@@ -43,5 +49,8 @@ exec srun "${PYTHON}" train.py \
     --n_m "${N_M}" \
     --max_updates "${MAX_UPDATES}" \
     --seed_train "${SEED}" \
-    --model_suffix "seed${SEED}" \
+    --model_suffix "${RUN_TAG}_seed${SEED}" \
+    --pooling_type "${POOLING_TYPE}" \
+    --pooling_ratio "${POOLING_RATIO}" \
+    --k_mode "${K_MODE}" \
     --device cuda

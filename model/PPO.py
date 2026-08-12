@@ -25,6 +25,8 @@ class Memory:
         self.comp_idx_seq = []  # [N, tensor[sz_b, M, M, J]]
         self.candidate_seq = []  # [N, tensor[sz_b, J]]
         self.fea_pairs_seq = []  # [N, tensor[sz_b, J]]
+        self.opes_appertain_seq = []  # [N, tensor[sz_b, N]]
+        self.deleted_op_nodes_seq = []  # [N, tensor[sz_b, N]]
 
         # other variables
         self.action_seq = []  # action index with shape [N, tensor[sz_b]]
@@ -50,6 +52,8 @@ class Memory:
         del self.comp_idx_seq[:]
         del self.candidate_seq[:]
         del self.fea_pairs_seq[:]
+        del self.opes_appertain_seq[:]
+        del self.deleted_op_nodes_seq[:]
 
     def push(self, state):
         """
@@ -65,6 +69,8 @@ class Memory:
         self.comp_idx_seq.append(state.comp_idx_tensor)
         self.candidate_seq.append(state.candidate_tensor)
         self.fea_pairs_seq.append(state.fea_pairs_tensor)
+        self.opes_appertain_seq.append(state.opes_appertain_tensor)
+        self.deleted_op_nodes_seq.append(state.deleted_op_nodes_tensor)
 
     def transpose_data(self):
         """
@@ -85,10 +91,13 @@ class Memory:
         t_val_seq = self.t_old_val_seq.flatten(0, 1)
         t_done_seq = torch.stack(self.done_seq, dim=0).transpose(0, 1).flatten(0, 1)
         t_logprobs_seq = torch.stack(self.log_probs, dim=0).transpose(0, 1).flatten(0, 1)
+        t_appertain_seq = torch.stack(self.opes_appertain_seq, dim=0).transpose(0, 1).flatten(0, 1)
+        t_deleted_seq = torch.stack(self.deleted_op_nodes_seq, dim=0).transpose(0, 1).flatten(0, 1)
 
         return t_Fea_j_seq, t_op_mask_seq, t_Fea_m_seq, t_mch_mask_seq, t_dynamicMask_seq, \
                t_Compete_m_seq, t_candidate_seq, t_pairMessage_seq, \
-               t_action_seq, t_reward_seq, t_val_seq, t_done_seq, t_logprobs_seq
+               t_action_seq, t_reward_seq, t_val_seq, t_done_seq, t_logprobs_seq, \
+               t_appertain_seq, t_deleted_seq
 
     def get_gae_advantages(self):
         """
@@ -186,7 +195,9 @@ class PPO:
                                         mch_mask=t_data[3][start_idx:end_idx],
                                         comp_idx=t_data[5][start_idx:end_idx],
                                         dynamic_pair_mask=t_data[4][start_idx:end_idx],
-                                        fea_pairs=t_data[7][start_idx:end_idx])
+                                        fea_pairs=t_data[7][start_idx:end_idx],
+                                        opes_appertain=t_data[13][start_idx:end_idx],
+                                        deleted_op_nodes=t_data[14][start_idx:end_idx])
 
                 action_batch = t_data[8][start_idx: end_idx]
                 logprobs, ent_loss = eval_actions(pis, action_batch)

@@ -57,6 +57,12 @@ class FJSPEnvForVariousOpNums:
         self.virtual_job_length = np.copy(self.job_length)
         self.virtual_job_length[:, -1] += self.max_number_of_ops - self.env_number_of_ops
 
+        # job index per operation ([E, N]), padding ops are assigned to the
+        # last job, they are excluded from pooling via the dummy mask anyway
+        self.opes_appertain = np.stack(
+            [np.repeat(np.arange(self.number_of_jobs), self.virtual_job_length[k])
+             for k in range(self.number_of_envs)])
+
         # [E, N, M]
         self.op_pt = np.array([np.pad(op_pt_list[k],
                                       ((0, self.max_number_of_ops - self.env_number_of_ops[k]),
@@ -146,7 +152,10 @@ class FJSPEnvForVariousOpNums:
         self.old_state.update(self.fea_j, self.op_mask,
                               self.fea_m, self.mch_mask,
                               self.dynamic_pair_mask, self.comp_idx, self.candidate,
-                              self.fea_pairs)
+                              self.fea_pairs,
+                              opes_appertain=self.opes_appertain,
+                              deleted_op_nodes=np.logical_or(self.deleted_op_nodes,
+                                                             self.mask_dummy_node))
 
         # old record
         self.old_op_mask = np.copy(self.op_mask)
@@ -183,6 +192,8 @@ class FJSPEnvForVariousOpNums:
 
     def initial_vars(self):
         self.step_count = 0
+        self.deleted_op_nodes = np.full(shape=(self.number_of_envs, self.max_number_of_ops),
+                                        fill_value=False, dtype=bool)
         self.done_flag = np.full(shape=(self.number_of_envs,), fill_value=0, dtype=bool)
         self.current_makespan = np.full(self.number_of_envs, float("-inf"))
         self.mch_queue = np.full(shape=[self.number_of_envs, self.number_of_machines,
@@ -352,7 +363,10 @@ class FJSPEnvForVariousOpNums:
 
         self.state.update(self.fea_j, self.op_mask, self.fea_m, self.mch_mask,
                           self.dynamic_pair_mask, self.comp_idx, self.candidate,
-                          self.fea_pairs)
+                          self.fea_pairs,
+                          opes_appertain=self.opes_appertain,
+                          deleted_op_nodes=np.logical_or(self.deleted_op_nodes,
+                                                         self.mask_dummy_node))
         self.done_flag = self.done()
 
         return self.state, np.array(reward), self.done_flag

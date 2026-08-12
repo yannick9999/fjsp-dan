@@ -50,7 +50,9 @@ def test_greedy_strategy(data_set, model_path, seed):
                                    mch_mask=state.mch_mask_tensor,  # [1, M, M]
                                    comp_idx=state.comp_idx_tensor,  # [1, M, M, J]
                                    dynamic_pair_mask=state.dynamic_pair_mask_tensor,
-                                   fea_pairs=state.fea_pairs_tensor)  # [1, J, M]
+                                   fea_pairs=state.fea_pairs_tensor,  # [1, J, M]
+                                   opes_appertain=state.opes_appertain_tensor,
+                                   deleted_op_nodes=state.deleted_op_nodes_tensor)
 
             action = greedy_select_action(pi)
             state, reward, done = env.step(actions=action.cpu().numpy())
@@ -98,7 +100,9 @@ def test_sampling_strategy(data_set, model_path, sample_times, seed):
                                    mch_mask=state.mch_mask_tensor,  # [100, M, M]
                                    comp_idx=state.comp_idx_tensor,  # [100, M, M, J]
                                    dynamic_pair_mask=state.dynamic_pair_mask_tensor,  # [100, J, M]
-                                   fea_pairs=state.fea_pairs_tensor)  # [100, J, M]
+                                   fea_pairs=state.fea_pairs_tensor,  # [100, J, M]
+                                   opes_appertain=state.opes_appertain_tensor,
+                                   deleted_op_nodes=state.deleted_op_nodes_tensor)
 
             action_envs, _ = sample_action(pi)
             state, _, done = env.step(action_envs.cpu().numpy())
